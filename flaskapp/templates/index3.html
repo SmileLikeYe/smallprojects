@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <script src="/static/jquery-3.2.0.min.js"></script>
+    <script src="/static/echarts.min.js"></script>
+
+</head>
+<body>
+    <button onclick="refreshdata_per_5s()">click me to refresh per 5s</button>
+    <div id="main" style="width: 1000px;height:700px;"></div>
+    <script type="text/javascript">
+    
+    var mydata
+    var myChart=echarts.init(document.getElementById('main'));
+    console.log("begin");
+    myChart.showLoading();
+
+    
+     
+    updateData = function(data){
+        option = {
+                title: {
+                    text: 'iphone销量',
+                    subtext: '纯属虚构',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    data:['iphone3']
+                },
+                visualMap: {
+                    min: 0,
+                    max: 120,
+                    left: 'left',
+                    top: 'bottom',
+                    text: ['高','低'],           // 文本，默认为数值文本
+                    calculable: true
+                },
+                toolbox: {
+                    show: true,
+                    orient: 'vertical',
+                    left: 'right',
+                    top: 'center',
+                    feature: {
+                        dataView: {readOnly: false},
+                        restore: {},
+                        saveAsImage: {}
+                    }
+                },
+                series: [
+                    {
+                        name: '2006',
+                        type: 'map',
+                        mapType: 'china',
+                        roam: false,
+                        label: {
+                            normal: {
+                                show: true
+                            },
+                            emphasis: {
+                                show: true
+                            }
+                        },
+                        data:data["2006"]
+                    },
+                    
+                ]
+            };
+
+            myChart.setOption(option);
+    }
+
+    
+    data = {{ data }}
+    updateData(data)
+
+    refreshdata_per_5s = function(){
+        setInterval(function () {
+            updateDataWithJson()
+        }, 2000);
+    }
+
+    </script>
+
+</body>
+</html>
