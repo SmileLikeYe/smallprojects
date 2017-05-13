@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        #loading {
+            position:absolute;
+            top: 50%;
+            left: 50%;
+            margin-left: -130px;
+            text-align: center;
+            margin-top: -50px;
+            width: 260px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            color: yellow;
+            font-size: 30x;
+        }
+
+        #panel {
+            background: #fff;
+            border: 1px solid #ccc;
+            position:absolute;
+            padding: 10px;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+    <div id="loading">纽约出租车145万上车点数据加载中...</div>
+    <div id="panel">数据来源<a target="_blank" href="http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml">NYC Taxi(纽约出租车上车点)</a>
+    </div>
+
+    <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+    <script type="text/javascript" src="mapv.js"></script>
+    <script type="text/javascript" src="dat.gui.js"></script>
+    <script type="text/javascript" src="jquery.csv.min.js"></script>
+
+    <script type="text/javascript">
+
+        // 百度地图API功能
+        var map = new BMap.Map("map", {
+            enableMapClick: false
+        });    // 创建Map实例
+        // map.centerAndZoom(new BMap.Point(121.4737,31.2304), 8);  // 初始化上海地图,设置中心点坐标和地图级别
+        map.centerAndZoom(new BMap.Point(105.403119, 38.028658), 5);  // 中国地图
+        map.enableScrollWheelZoom(true); // 开启鼠标滚轮缩放
+
+        /*
+        map.setMapStyle({
+            style: 'midnight'
+        });
+        */
+
+        // map.setMapStyle({
+        //     styleJson: [
+        //         {
+        //             "featureType": "all",
+        //             "elementType": "all",
+        //             "stylers": {
+        //                 "lightness": 61,
+        //                 "saturation": -100
+        //             }
+        //         }
+        //     ]
+        // });
+        map.setMapStyle({
+            style: 'midnight'
+        });
+
+
+        csvstr1 = {};
+        dataSet = {}
+        points = []
+        $.get('http://0.0.0.0:8000/id1.csv', function(csvstr) {
+            csvstr1= csvstr
+            // var options = {
+            //     size: 20,
+            //     context: 'webgl',
+            //     fillStyle: 'rgba(250, 50, 50, 0.8)',
+            //     draw: 'simple',
+            //     lineCap: 'butt',
+            //     lineJoin: 'miter',
+            // }
+            points = $.csv.toArrays(csvstr);
+
+            var options = {
+                size: 10,
+                gradient: { 0.25: "rgb(0,0,255)", 0.55: "rgb(0,255,0)", 0.85: "yellow", 1.0: "rgb(255,0,0)"},
+                max: 60,
+                draw: 'heatmap',
+                fillStyle: 'rgba(250, 50, 50, 0.8)',
+            }
+            
+
+            console.log(csvstr)
+
+            dataSet = mapv.csv.getDataSet(csvstr);
+            console.log(dataSet)
+            dataSet.initGeometry();
+            console.log(dataSet)
+
+            var mapvLayer = new mapv.baiduMapLayer(map, dataSet, options);
+
+            $('#loading').hide();
+
+            function finished() {
+                mapvLayer.update({
+                    options: options 
+                });
+            };
+
+            var gui = new dat.GUI({
+                nameMap: {
+                    size: '大小',
+                    fillStyle: '颜色'
+                }
+            });
+
+            gui.add(options, 'size', 0.1, 10).onFinishChange(finished);
+            gui.addColor(options, 'fillStyle').onChange(finished);
+
+        });
+
+    </script>
+	
+</body>
+</html>
